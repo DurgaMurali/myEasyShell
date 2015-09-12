@@ -1,0 +1,75 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<sys/wait.h>
+#include<string.h>
+#include<errno.h>
+
+#define BUF_SIZE 500
+
+void tokenize(void);
+
+char buffer[BUF_SIZE];
+char **argument;
+char * cmd;
+
+int main(int argc,char *argv[],char *env)
+{
+	int pid,ret,status,i,n;
+
+
+	while(1)
+	{
+		gets(buffer);
+
+		if((pid=fork())<0)
+		{
+			perror("Fork\n");
+			exit(1);
+		}
+
+		if(pid==0)
+		{
+			tokenize();
+
+
+			if(execvp(cmd,argument)==-1)
+			{
+				perror("Execv\n");
+				printf("Error = %s\n",strerror(errno));
+				exit(1);
+			}
+		}
+
+		else
+		{
+			wait(&status);
+			
+		}
+	}
+
+	return 0;
+}
+
+
+void tokenize(void)
+{
+	int i=0;
+
+	cmd=strtok(buffer," ");
+
+	argument=(char **)calloc(2,sizeof(char *));
+
+	argument[i++]=cmd;
+
+	while((argument[i++]=strtok(NULL," "))!=NULL)
+		argument=(char **)realloc(argument,sizeof(argument)+1);
+
+	argument[i]=NULL;
+
+}
+
+
+	
